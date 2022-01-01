@@ -32,3 +32,15 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+## Tips
+
+- How to create a new vue project
+
+```sh
+npm install -g @vue/cli
+```
+
+```sh
+vue create vue-starter-project
+```
