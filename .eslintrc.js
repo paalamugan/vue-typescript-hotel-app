@@ -1,3 +1,36 @@
+const removeLastStar = (path) => path.replace(/(\/\*)$/, '');
+
+const absolutePath = (path) => {
+  return require('path').resolve(__dirname, removeLastStar(path));
+};
+
+const webpackResolveAlias = (() => {
+  try {
+    const result = {};
+    const tsConfig = require('./tsconfig.json');
+    const { paths } = tsConfig.compilerOptions;
+
+    for (const key in paths) {
+      const keyValue = removeLastStar(key);
+      let pathValues = paths[key];
+
+      if (pathValues) {
+        pathValues = (typeof paths[key] === 'string' ? [pathValues] : pathValues) || [];
+
+        pathValues.forEach((value) => {
+          result[keyValue] = absolutePath(value);
+        });
+      }
+    }
+
+    return result;
+  } catch {
+    return {
+      '@app': absolutePath('src'),
+    };
+  }
+})();
+
 module.exports = {
   root: true,
   env: {
@@ -25,16 +58,27 @@ module.exports = {
         endOfLine: 'auto',
       },
     ],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
+    ],
+    'no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
+    ],
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'class-methods-use-this': 'off',
     quotes: ['error', 'single'],
-    // we want to force semicolons
-    semi: ['error', 'always'],
-    // we use 2 spaces to indent our code
-    indent: ['error', 2],
-    // we want to avoid extraneous spaces
-    'no-multi-spaces': ['error'],
+    semi: ['error', 'always'], // we want to force semicolons
+    indent: ['error', 2], // we use 2 spaces to indent our code
+    'no-multi-spaces': ['error'], // we want to avoid extraneous spaces
   },
   overrides: [
     {
@@ -44,4 +88,15 @@ module.exports = {
       },
     },
   ],
+  settings: {
+    'import/resolver': {
+      webpack: {
+        config: {
+          resolve: {
+            alias: webpackResolveAlias,
+          },
+        },
+      },
+    },
+  },
 };
